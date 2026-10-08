@@ -13,6 +13,7 @@ use App\Models\Cita;
 use App\Models\Horario;
 use App\Models\Servicio;
 use App\Support\Disponibilidad;
+use App\Support\Fechas;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -28,7 +29,7 @@ class AgendaController extends Controller
 {
     public function index(Request $request): Response
     {
-        $fecha = $this->fecha($request->query('fecha'));
+        $fecha = Fechas::dia($request->query('fecha'));
 
         $barberos = Barbero::query()
             ->activos()
@@ -150,12 +151,4 @@ class AgendaController extends Controller
         return back()->with('success', "Cita marcada como {$nuevo->etiqueta()}.");
     }
 
-    private function fecha(?string $valor): Carbon
-    {
-        try {
-            return Carbon::createFromFormat('!Y-m-d', (string) $valor)->startOfDay();
-        } catch (\Throwable) {
-            return now()->startOfDay();
-        }
-    }
 }

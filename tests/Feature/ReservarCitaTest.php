@@ -6,6 +6,7 @@ use App\Actions\ReservarCita;
 use App\Enums\EstadoCita;
 use App\Enums\OrigenCita;
 use App\Exceptions\CupoNoDisponible;
+use App\Models\Barbero;
 use App\Models\Cita;
 use App\Models\Cliente;
 use App\Models\Servicio;
@@ -178,7 +179,7 @@ class ReservarCitaTest extends TestCase
 
     public function test_dos_barberos_pueden_tener_citas_a_la_misma_hora(): void
     {
-        $otro = \App\Models\Barbero::factory()->create(['barberia_id' => $this->barberia->id]);
+        $otro = Barbero::factory()->create(['barberia_id' => $this->barberia->id]);
         $otro->servicios()->attach($this->corte->id);
         $this->horario($otro, 1, '09:00', '12:00');
 

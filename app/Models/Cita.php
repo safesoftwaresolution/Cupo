@@ -46,13 +46,18 @@ class Cita extends Model
 
     public function servicios(): BelongsToMany
     {
+        // `withTrashed`: si el servicio se eliminó después, la cita conserva su copia (nombre y precio).
         return $this->belongsToMany(Servicio::class, 'cita_servicio')
+            ->withTrashed()
             ->withPivot(['nombre', 'duracion_minutos', 'precio']);
     }
 
+    /**
+     * La venta vigente de la cita (las anuladas no cuentan, así que puede cobrarse de nuevo).
+     */
     public function venta(): HasOne
     {
-        return $this->hasOne(Venta::class);
+        return $this->hasOne(Venta::class)->whereNull('ventas.anulada_en');
     }
 
     /**
