@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Marca Cupo — tokens de diseño.
+ * Paleta: tinta (casi negro cálido) + dorado latón sobre fondos hueso.
+ * Los colores son HSL sin función para que Tailwind pueda aplicarles opacidad.
+ * Guía completa en docs/marca.md.
+ */
+@layer base {
+    :root {
+        --background: 60 9% 98%; /* hueso #FAFAF9 */
+        --foreground: 24 10% 10%; /* tinta #1C1917 */
+        --card: 0 0% 100%;
+        --card-foreground: 24 10% 10%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 24 10% 10%;
+
+        --primary: 24 10% 10%; /* botones principales: tinta */
+        --primary-foreground: 60 9% 98%;
+        --secondary: 60 5% 96%;
+        --secondary-foreground: 24 10% 10%;
+        --muted: 60 5% 96%;
+        --muted-foreground: 25 5% 32%; /* #57534E, 7:1 sobre hueso */
+        --accent: 40 20% 93%; /* arena: fondo al pasar el cursor */
+        --accent-foreground: 24 10% 10%;
+
+        --brand: 35 92% 33%; /* dorado #A16207, 4.9:1 sobre blanco */
+        --brand-foreground: 0 0% 100%;
+        --brand-soft: 45 93% 93%; /* fondo dorado suave */
+        --success: 142 72% 29%; /* #15803D, cupo libre / confirmado */
+        --success-soft: 138 60% 93%;
+        --destructive: 0 72% 51%; /* #DC2626 */
+        --destructive-foreground: 0 0% 100%;
+
+        --border: 30 6% 90%;
+        --input: 30 5% 58%; /* borde de campos con 3:1 de contraste */
+        --ring: 35 92% 33%;
+        --radius: 0.625rem;
+
+        --chart-1: 35 92% 33%;
+        --chart-2: 142 72% 29%;
+        --chart-3: 24 10% 10%;
+        --chart-4: 43 96% 56%;
+        --chart-5: 25 5% 45%;
+
+        /* Barra lateral: siempre tinta, ancla visual de la marca. */
+        --sidebar-background: 24 10% 10%;
+        --sidebar-foreground: 30 8% 80%;
+        --sidebar-primary: 46 97% 65%; /* dorado claro #FCD34D */
+        --sidebar-primary-foreground: 24 10% 10%;
+        --sidebar-accent: 24 8% 17%;
+        --sidebar-accent-foreground: 60 9% 98%;
+        --sidebar-border: 24 8% 20%;
+        --sidebar-ring: 46 97% 65%;
+    }
+
+    .dark {
+        --background: 20 14% 4%; /* #0C0A09 */
+        --foreground: 60 9% 98%;
+        --card: 24 10% 10%;
+        --card-foreground: 60 9% 98%;
+        --popover: 24 10% 10%;
+        --popover-foreground: 60 9% 98%;
+
+        --primary: 46 97% 65%; /* en oscuro el botón principal es dorado */
+        --primary-foreground: 20 14% 4%;
+        --secondary: 24 8% 15%;
+        --secondary-foreground: 60 9% 98%;
+        --muted: 24 8% 12%;
+        --muted-foreground: 30 6% 66%;
+        --accent: 24 8% 16%;
+        --accent-foreground: 60 9% 98%;
+
+        --brand: 46 97% 65%;
+        --brand-foreground: 20 14% 4%;
+        --brand-soft: 40 40% 14%;
+        --success: 142 60% 55%;
+        --success-soft: 142 40% 13%;
+        --destructive: 0 72% 58%;
+        --destructive-foreground: 0 0% 100%;
+
+        --border: 24 8% 18%;
+        --input: 24 6% 40%;
+        --ring: 46 97% 65%;
+
+        --chart-1: 46 97% 65%;
+        --chart-2: 142 60% 55%;
+        --chart-3: 60 9% 90%;
+        --chart-4: 35 92% 45%;
+        --chart-5: 30 6% 60%;
+
+        --sidebar-background: 24 10% 10%;
+        --sidebar-foreground: 30 8% 80%;
+        --sidebar-primary: 46 97% 65%;
+        --sidebar-primary-foreground: 24 10% 10%;
+        --sidebar-accent: 24 8% 17%;
+        --sidebar-accent-foreground: 60 9% 98%;
+        --sidebar-border: 24 8% 20%;
+        --sidebar-ring: 46 97% 65%;
+    }
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    html {
+        font-size: 16px;
+    }
+
+    body {
+        @apply bg-background font-sans text-foreground antialiased;
+        line-height: 1.5;
+    }
+
+    /* Títulos con la tipografía de marca (Outfit). */
+    h1,
+    h2,
+    h3,
+    h4 {
+        @apply font-display tracking-tight;
+    }
+
+    /* Todo lo clicable lo parece. */
+    button:not(:disabled),
+    [role='button']:not([aria-disabled='true']),
+    summary,
+    label[for] {
+        cursor: pointer;
+    }
+
+    button:disabled,
+    [aria-disabled='true'] {
+        cursor: not-allowed;
+    }
+
+    /* Respeta a quien pide menos movimiento. */
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            scroll-behavior: auto !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+}
+
+/* Textura de la marca: franjas diagonales tipo poste de barbero, muy sutiles. */
+@layer utilities {
+    .bg-poste {
+        background-image: repeating-linear-gradient(-45deg, transparent 0 14px, hsl(var(--brand) / 0.07) 14px 22px);
+    }
+}
