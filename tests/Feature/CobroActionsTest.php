@@ -11,6 +11,7 @@ use App\Enums\MetodoPago;
 use App\Enums\Rol;
 use App\Exceptions\CobroNoPermitido;
 use App\Models\CierreCaja;
+use App\Models\Cita;
 use App\Models\Servicio;
 use App\Models\User;
 use App\Models\Venta;
@@ -42,7 +43,7 @@ class CobroActionsTest extends TestCase
 
     private function cobrar(int $citaId, int $descuento = 0, int $propina = 0, MetodoPago $metodo = MetodoPago::Efectivo): Venta
     {
-        return app(CobrarCita::class)(\App\Models\Cita::findOrFail($citaId), $descuento, $propina, $metodo, $this->dueno);
+        return app(CobrarCita::class)(Cita::findOrFail($citaId), $descuento, $propina, $metodo, $this->dueno);
     }
 
     // --- Cobrar una cita ------------------------------------------------------

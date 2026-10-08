@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\ReservarCita;
 use App\Enums\EstadoCita;
+use App\Enums\MetodoPago;
 use App\Enums\OrigenCita;
 use App\Exceptions\CupoNoDisponible;
 use App\Http\Requests\CitaManualRequest;
@@ -49,11 +50,14 @@ class AgendaController extends Controller
 
         $citas = Cita::query()
             ->whereBetween('inicia_en', [$fecha->copy()->startOfDay(), $fecha->copy()->endOfDay()])
-            ->with(['cliente:id,nombre,telefono', 'servicios'])
+            ->with(['cliente:id,nombre,telefono', 'servicios', 'venta'])
             ->orderBy('inicia_en')
             ->get()
             ->map(fn (Cita $c) => [
                 'id' => $c->id,
+                // Se puede cobrar si sigue viva (o ya se marcó completada a mano) y aún no tiene venta vigente.
+                'cobrable' => $c->venta === null && in_array($c->estado, [EstadoCita::Pendiente, EstadoCita::Confirmada, EstadoCita::Completada], true),
+                'venta' => $c->venta ? ['total' => $c->venta->total, 'metodo' => $c->venta->metodo_pago->etiqueta()] : null,
                 'barbero_id' => $c->barbero_id,
                 'inicia' => $c->inicia_en->format('H:i'),
                 'termina' => $c->termina_en->format('H:i'),
@@ -75,6 +79,7 @@ class AgendaController extends Controller
             'barberos' => $barberos,
             'citas' => $citas,
             'servicios' => Servicio::query()->activos()->orderBy('orden')->orderBy('nombre')->get(['id', 'nombre', 'duracion_minutos', 'precio']),
+            'metodos' => collect(MetodoPago::cases())->map(fn (MetodoPago $m) => ['valor' => $m->value, 'etiqueta' => $m->etiqueta()]),
         ]);
     }
 
@@ -150,5 +155,4 @@ class AgendaController extends Controller
 
         return back()->with('success', "Cita marcada como {$nuevo->etiqueta()}.");
     }
-
 }

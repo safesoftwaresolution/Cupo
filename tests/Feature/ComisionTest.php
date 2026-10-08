@@ -132,8 +132,7 @@ class ComisionTest extends TestCase
         $this->assertStringStartsWith("\xEF\xBB\xBF", $csv, 'Lleva BOM para que Excel respete las tildes.');
 
         // Se lee como CSV de verdad (separador ;), no como texto, para no depender de las comillas.
-        $filas = array_map(fn ($linea) => str_getcsv($linea, ';'), explode("
-", trim(substr($csv, 3))));
+        $filas = array_map(fn ($linea) => str_getcsv($linea, ';'), preg_split('/\R/', trim(substr($csv, 3))));
 
         $this->assertSame(['Barbero', 'Ventas', 'Servicios (sin descuentos)', 'Comisión', 'Propinas', 'Total a pagar al barbero', 'Para la barbería'], $filas[0]);
         $this->assertSame([$this->barbero->nombre, '1', '30000', '15000', '3000', '18000', '15000'], $filas[1]);

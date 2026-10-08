@@ -76,3 +76,15 @@ export interface PasoConfiguracion {
 }
 
 export type BreadcrumbItemType = BreadcrumbItem;
+
+export interface CitaPorCobrar {
+    id: number;
+    cliente: string;
+    servicios: string;
+    precio_total: number;
+}
+
+export interface MetodoPagoOpcion {
+    valor: string;
+    etiqueta: string;
+}

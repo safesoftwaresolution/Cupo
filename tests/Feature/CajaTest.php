@@ -7,10 +7,11 @@ use App\Enums\MetodoPago;
 use App\Enums\Rol;
 use App\Models\Barberia;
 use App\Models\Barbero;
-use App\Models\Cita;
 use App\Models\CierreCaja;
-use App\Models\Venta;
+use App\Models\Cita;
+use App\Models\Servicio;
 use App\Models\User;
+use App\Models\Venta;
 use App\Support\TenantContext;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
@@ -113,7 +114,7 @@ class CajaTest extends TestCase
                 ->where('porMetodo.0.total', 48000)
                 ->where('porMetodo.1.total', 0)
                 ->has('porBarbero', 2)
-                ->where('porBarbero.0.a_pagar', 18000) // 15.000 de comisión + 3.000 de propina
+                ->where('porBarbero.0.a_pagar', 28000) // comisiones 15.000 + 10.000, más 3.000 de propina
                 ->has('ventas', 4) // incluye la anulada, marcada
         );
     }
@@ -238,7 +239,7 @@ class CajaTest extends TestCase
     public function test_una_venta_de_mostrador_con_servicios_ajenos_se_rechaza(): void
     {
         $otraBarberia = Barberia::factory()->create();
-        $ajeno = \App\Models\Servicio::factory()->create(['barberia_id' => $otraBarberia->id]);
+        $ajeno = Servicio::factory()->create(['barberia_id' => $otraBarberia->id]);
 
         $this->actingAs($this->dueno)->post('/caja/ventas', [
             'barbero_id' => $this->barbero->id,
@@ -348,5 +349,53 @@ class CajaTest extends TestCase
         $this->actingAs($this->dueno)->delete("/caja/cierre/{$ajeno->id}")->assertNotFound();
 
         $this->assertSame(1, CierreCaja::withoutGlobalScopes()->count());
+    }
+
+    // --- Integración con la agenda y el inicio -----------------------------------------------
+
+    public function test_la_agenda_indica_si_una_cita_se_puede_cobrar_o_ya_esta_cobrada(): void
+    {
+        $cita = $this->reservar('10:00');
+
+        $this->actingAs($this->dueno)->get('/agenda?fecha=2026-10-12')->assertInertia(
+            fn (Assert $page) => $page->where('citas.0.cobrable', true)->where('citas.0.venta', null)
+        );
+
+        $this->actingAs($this->dueno)->post("/caja/citas/{$cita->id}/cobrar", ['metodo_pago' => 'tarjeta']);
+
+        $this->actingAs($this->dueno)->get('/agenda?fecha=2026-10-12')->assertInertia(
+            fn (Assert $page) => $page->where('citas.0.cobrable', false)->where('citas.0.venta.total', 20000)->where('citas.0.venta.metodo', 'Tarjeta')
+        );
+    }
+
+    public function test_una_cita_cancelada_no_es_cobrable_en_la_agenda(): void
+    {
+        $this->reservar('10:00')->update(['estado' => EstadoCita::Cancelada]);
+
+        $this->actingAs($this->dueno)->get('/agenda?fecha=2026-10-12')->assertInertia(
+            fn (Assert $page) => $page->where('citas.0.cobrable', false)
+        );
+    }
+
+    public function test_la_agenda_conserva_el_nombre_del_servicio_aunque_se_elimine(): void
+    {
+        $this->reservar('10:00');
+        $this->corte->delete();
+
+        $this->actingAs($this->dueno)->get('/agenda?fecha=2026-10-12')->assertInertia(
+            fn (Assert $page) => $page->where('citas.0.servicios', 'Corte')
+        );
+    }
+
+    public function test_el_inicio_muestra_lo_cobrado_hoy_sin_contar_anuladas(): void
+    {
+        $this->venta(['total' => 20000, 'pagada_en' => now()]);
+        $this->venta(['total' => 15000, 'pagada_en' => now()]);
+        $this->venta(['total' => 99000, 'pagada_en' => now(), 'anulada_en' => now()]);
+        $this->venta(['total' => 77000, 'pagada_en' => now()->subDay()]);
+
+        $this->actingAs($this->dueno)->get('/dashboard')->assertInertia(
+            fn (Assert $page) => $page->where('hoy.cobrado', 35000)
+        );
     }
 }

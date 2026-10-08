@@ -7,6 +7,7 @@ use App\Models\Barbero;
 use App\Models\Cita;
 use App\Models\Horario;
 use App\Models\Servicio;
+use App\Models\Venta;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -34,6 +35,7 @@ class DashboardController extends Controller
             'hoy' => [
                 'total' => $hoy->count(),
                 'ingresos' => (int) $hoy->sum('precio_total'),
+                'cobrado' => (int) Venta::query()->vigentes()->delDia(now())->sum('total'),
                 'proximas' => $hoy
                     ->filter(fn (Cita $c) => $c->termina_en->isFuture())
                     ->take(5)

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CobroDialog from '@/components/CobroDialog.vue';
 import EmptyState from '@/components/EmptyState.vue';
 import InputError from '@/components/InputError.vue';
 import PageHeader from '@/components/PageHeader.vue';
@@ -9,9 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { formatoCOP } from '@/lib/format';
-import { type BreadcrumbItem } from '@/types';
+import { type BreadcrumbItem, type CitaPorCobrar, type MetodoPagoOpcion } from '@/types';
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
-import { CalendarDays, ChevronLeft, ChevronRight, CircleAlert, LoaderCircle, MessageCircle, Phone, Plus, Users } from 'lucide-vue-next';
+import { CalendarDays, ChevronLeft, ChevronRight, CircleAlert, LoaderCircle, MessageCircle, Phone, Plus, Users, Wallet } from 'lucide-vue-next';
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 interface CitaAgenda {
@@ -26,6 +27,8 @@ interface CitaAgenda {
     precio_total: number;
     origen: string;
     notas: string | null;
+    cobrable: boolean;
+    venta: { total: number; metodo: string } | null;
     transiciones: { valor: string; etiqueta: string }[];
 }
 
@@ -50,6 +53,7 @@ const props = defineProps<{
     barberos: BarberoAgenda[];
     citas: CitaAgenda[];
     servicios: ServicioAgenda[];
+    metodos: MetodoPagoOpcion[];
 }>();
 
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Agenda', href: '/agenda' }];
@@ -152,7 +156,7 @@ const verCita = (cita: CitaAgenda) => {
 
 const verbos: Record<string, string> = {
     confirmada: 'Confirmar',
-    completada: 'Marcar como completada',
+    completada: 'Completar sin cobrar',
     no_asistio: 'No asistió',
     cancelada: 'Cancelar cita',
 };
@@ -161,6 +165,17 @@ const cambiarEstado = (cita: CitaAgenda, estado: string) => {
     if (estado === 'cancelada' && !confirm(`¿Cancelar la cita de ${cita.cliente.nombre}? El cupo quedará libre.`)) return;
 
     router.patch(route('agenda.citas.estado', cita.id), { estado }, { preserveScroll: true, onSuccess: () => (detalleAbierto.value = false) });
+};
+
+// --- Cobrar ---------------------------------------------------------------------------
+
+const cobroAbierto = ref(false);
+const citaACobrar = ref<CitaPorCobrar | null>(null);
+
+const cobrar = (cita: CitaAgenda) => {
+    citaACobrar.value = { id: cita.id, cliente: cita.cliente.nombre, servicios: cita.servicios, precio_total: cita.precio_total };
+    detalleAbierto.value = false;
+    cobroAbierto.value = true;
 };
 
 // --- Nueva cita -----------------------------------------------------------------------
@@ -334,6 +349,9 @@ const telefonoLegible = (telefono: string) => telefono.replace(/^57(\d{3})(\d{3}
                         >
                             <span class="block truncate font-semibold">{{ cita.cliente.nombre }}</span>
                             <span class="block truncate text-muted-foreground">{{ cita.inicia }} · {{ cita.servicios }}</span>
+                            <span v-if="cita.venta" class="block truncate font-semibold text-success"
+                                >Cobrada · {{ formatoCOP(cita.venta.total) }}</span
+                            >
                         </button>
                     </div>
                 </div>
@@ -375,7 +393,12 @@ const telefonoLegible = (telefono: string) => telefono.replace(/^57(\d{3})(\d{3}
                     </div>
                 </div>
 
-                <DialogFooter v-if="citaActual.transiciones.length" class="flex-col gap-2 sm:flex-col sm:space-x-0">
+                <p v-if="citaActual.venta" class="flex items-center gap-2 rounded-lg bg-success-soft px-3 py-2 text-sm font-semibold text-success">
+                    Cobrada: {{ formatoCOP(citaActual.venta.total) }} · {{ citaActual.venta.metodo }}
+                </p>
+
+                <DialogFooter v-if="citaActual.cobrable || citaActual.transiciones.length" class="flex-col gap-2 sm:flex-col sm:space-x-0">
+                    <Button v-if="citaActual.cobrable" class="w-full" @click="cobrar(citaActual)"><Wallet /> Cobrar</Button>
                     <Button
                         v-for="t in citaActual.transiciones"
                         :key="t.valor"
@@ -482,5 +505,6 @@ const telefonoLegible = (telefono: string) => telefono.replace(/^57(\d{3})(\d{3}
                 </form>
             </DialogContent>
         </Dialog>
+        <CobroDialog v-model:open="cobroAbierto" :cita="citaACobrar" :metodos="metodos" />
     </AppLayout>
 </template>

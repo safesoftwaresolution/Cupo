@@ -23,7 +23,7 @@ interface CitaProxima {
 const props = defineProps<{
     pasos: PasoConfiguracion[];
     urlReserva: string;
-    hoy: { total: number; ingresos: number; proximas: CitaProxima[] };
+    hoy: { total: number; ingresos: number; cobrado: number; proximas: CitaProxima[] };
 }>();
 
 const page = usePage<SharedData>();
@@ -103,7 +103,7 @@ const copiarEnlace = async () => {
             </Card>
 
             <template v-if="puedeVerAgenda && (listo || !esDueno)">
-                <div class="grid gap-4 sm:grid-cols-2 lg:max-w-3xl">
+                <div class="grid gap-4 sm:grid-cols-3 lg:max-w-3xl">
                     <Card>
                         <CardHeader class="space-y-1 pb-2">
                             <CardDescription>Citas de hoy</CardDescription>
@@ -112,8 +112,14 @@ const copiarEnlace = async () => {
                     </Card>
                     <Card>
                         <CardHeader class="space-y-1 pb-2">
-                            <CardDescription>Ingresos previstos hoy</CardDescription>
-                            <CardTitle class="text-4xl tabular-nums">{{ formatoCOP(hoy.ingresos) }}</CardTitle>
+                            <CardDescription>Previsto hoy</CardDescription>
+                            <CardTitle class="text-3xl tabular-nums">{{ formatoCOP(hoy.ingresos) }}</CardTitle>
+                        </CardHeader>
+                    </Card>
+                    <Card>
+                        <CardHeader class="space-y-1 pb-2">
+                            <CardDescription>Cobrado hoy</CardDescription>
+                            <CardTitle class="text-3xl tabular-nums text-success">{{ formatoCOP(hoy.cobrado) }}</CardTitle>
                         </CardHeader>
                     </Card>
                 </div>

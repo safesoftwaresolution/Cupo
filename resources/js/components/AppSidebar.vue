@@ -4,7 +4,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { CalendarDays, LayoutGrid, Scissors, Users } from 'lucide-vue-next';
+import { CalendarDays, LayoutGrid, Percent, Scissors, Users, Wallet } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
@@ -16,11 +16,15 @@ const mainNavItems = computed<NavItem[]>(() => {
 
     // La agenda la manejan el dueño y la recepción; la configuración de la barbería es solo del dueño.
     if (rol === 'dueno' || rol === 'recepcion') {
-        items.push({ title: 'Agenda', href: '/agenda', icon: CalendarDays });
+        items.push({ title: 'Agenda', href: '/agenda', icon: CalendarDays }, { title: 'Caja', href: '/caja', icon: Wallet });
     }
 
     if (rol === 'dueno') {
-        items.push({ title: 'Barberos', href: '/barberos', icon: Users }, { title: 'Servicios', href: '/servicios', icon: Scissors });
+        items.push(
+            { title: 'Comisiones', href: '/comisiones', icon: Percent },
+            { title: 'Barberos', href: '/barberos', icon: Users },
+            { title: 'Servicios', href: '/servicios', icon: Scissors },
+        );
     }
 
     return items;

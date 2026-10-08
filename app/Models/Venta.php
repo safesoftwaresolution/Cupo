@@ -4,8 +4,8 @@ namespace App\Models;
 
 use App\Enums\MetodoPago;
 use App\Models\Concerns\PerteneceABarberia;
-use Database\Factories\VentaFactory;
 use Carbon\CarbonInterface;
+use Database\Factories\VentaFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
