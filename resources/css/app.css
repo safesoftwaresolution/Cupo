@@ -45,6 +45,13 @@
         --chart-4: 43 96% 56%;
         --chart-5: 25 5% 45%;
 
+        /* Gráficas. Acento y contexto validados con scripts/validate_palette.js de la guía de dataviz:
+           el acento es el protagonista; el gris es contexto (periodo anterior, "los demás"). */
+        --viz-acento: 35 92% 33%; /* #A16207, 4,9:1 sobre blanco */
+        --viz-contexto: 30 4% 52%; /* #898480, 3,6:1 */
+        --viz-rejilla: 30 6% 90%;
+        --viz-eje: 30 6% 80%;
+
         /* Barra lateral: siempre tinta, ancla visual de la marca. */
         --sidebar-background: 24 10% 10%;
         --sidebar-foreground: 30 8% 80%;
@@ -90,6 +97,11 @@
         --chart-3: 60 9% 90%;
         --chart-4: 35 92% 45%;
         --chart-5: 30 6% 60%;
+
+        --viz-acento: 40 97% 39%; /* #C28203: dentro de la banda de luminosidad oscura y 5:1 sobre la tarjeta */
+        --viz-contexto: 25 5% 45%;
+        --viz-rejilla: 24 8% 18%;
+        --viz-eje: 24 8% 26%;
 
         --sidebar-background: 24 10% 10%;
         --sidebar-foreground: 30 8% 80%;

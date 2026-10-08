@@ -21,6 +21,8 @@ class ComisionController extends Controller
 
     public function index(Request $request): Response
     {
+        $this->exigirComisiones($request);
+
         [$desde, $hasta] = $this->rango($request);
         $filas = $this->filas($desde, $hasta);
 
@@ -34,6 +36,8 @@ class ComisionController extends Controller
 
     public function exportar(Request $request): StreamedResponse
     {
+        $this->exigirComisiones($request);
+
         [$desde, $hasta] = $this->rango($request);
         $filas = $this->filas($desde, $hasta);
         $totales = $this->totales($filas);
@@ -53,6 +57,14 @@ class ComisionController extends Controller
 
             fclose($salida);
         }, "comisiones-{$desde->toDateString()}-a-{$hasta->toDateString()}.csv", ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /**
+     * Una barbería que no maneja comisiones no tiene esta sección.
+     */
+    private function exigirComisiones(Request $request): void
+    {
+        abort_unless($request->user()->barberia->maneja_comisiones, 404);
     }
 
     /**

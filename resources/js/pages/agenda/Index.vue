@@ -28,6 +28,8 @@ interface CitaAgenda {
     origen: string;
     notas: string | null;
     cobrable: boolean;
+    acepta_whatsapp: boolean;
+    recordatorio: { estado: string; etiqueta: string; enviado: string | null; respuesta: string | null; error: string | null } | null;
     venta: { total: number; metodo: string } | null;
     transiciones: { valor: string; etiqueta: string }[];
 }
@@ -380,6 +382,34 @@ const telefonoLegible = (telefono: string) => telefono.replace(/^57(\d{3})(\d{3}
                     <p class="text-muted-foreground">
                         Celular: <span class="font-medium tabular-nums text-foreground">{{ telefonoLegible(citaActual.cliente.telefono) }}</span>
                     </p>
+                    <div class="rounded-lg border p-3">
+                        <p class="mb-1.5 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                            <MessageCircle class="size-3.5" aria-hidden="true" /> Recordatorio por WhatsApp
+                        </p>
+                        <template v-if="citaActual.recordatorio">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <Badge
+                                    :variant="
+                                        ['entregado', 'leido'].includes(citaActual.recordatorio.estado)
+                                            ? 'success'
+                                            : citaActual.recordatorio.estado === 'fallido'
+                                              ? 'muted'
+                                              : 'brand'
+                                    "
+                                    >{{ citaActual.recordatorio.etiqueta }}</Badge
+                                >
+                                <span v-if="citaActual.recordatorio.enviado" class="text-xs text-muted-foreground"
+                                    >a las {{ citaActual.recordatorio.enviado }}</span
+                                >
+                                <Badge v-if="citaActual.recordatorio.respuesta === 'confirmo'" variant="success">Confirmó por WhatsApp</Badge>
+                            </div>
+                            <p v-if="citaActual.recordatorio.error" class="mt-1.5 text-xs text-destructive">{{ citaActual.recordatorio.error }}</p>
+                        </template>
+                        <p v-else-if="!citaActual.acepta_whatsapp" class="text-sm text-muted-foreground">
+                            El cliente no autorizó recibir mensajes. Escríbele tú si necesitas avisarle.
+                        </p>
+                        <p v-else class="text-sm text-muted-foreground">Se enviará automáticamente antes de la cita.</p>
+                    </div>
                     <p v-if="citaActual.notas" class="rounded-md bg-muted p-3">{{ citaActual.notas }}</p>
                     <div class="flex gap-2">
                         <Button variant="outline" size="sm" as-child>

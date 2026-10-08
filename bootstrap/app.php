@@ -21,6 +21,9 @@ return Application::configure(basePath: dirname(__DIR__))
             AddLinkHeadersForPreloadedAssets::class,
         ]);
 
+        // Meta no envía token CSRF; el webhook se protege con la firma de la petición.
+        $middleware->validateCsrfTokens(except: ['webhooks/*']);
+
         $middleware->alias([
             'barberia' => EnsureHasBarberia::class,
             'rol' => EnsureRol::class,

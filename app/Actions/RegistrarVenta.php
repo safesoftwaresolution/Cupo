@@ -55,6 +55,9 @@ class RegistrarVenta
                 throw CobroNoPermitido::cajaCerrada();
             }
 
+            // Si la barbería no maneja comisiones, la venta queda en 0%: todo el ingreso es de la barbería.
+            $porcentaje = $barbero->barberia->maneja_comisiones ? $barbero->comision_porcentaje : 0;
+
             $venta = Venta::create([
                 'cita_id' => $cita?->id,
                 'barbero_id' => $barbero->id,
@@ -65,8 +68,8 @@ class RegistrarVenta
                 'propina' => $propina,
                 'total' => $subtotal - $descuento + $propina,
                 'metodo_pago' => $metodo,
-                'comision_porcentaje' => $barbero->comision_porcentaje,
-                'comision_monto' => Venta::calcularComision($subtotal, $descuento, $barbero->comision_porcentaje),
+                'comision_porcentaje' => $porcentaje,
+                'comision_monto' => Venta::calcularComision($subtotal, $descuento, $porcentaje),
                 'pagada_en' => $ahora,
             ]);
 

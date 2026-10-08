@@ -41,7 +41,7 @@ class BarberoController extends Controller
     {
         $datos = $request->validated();
 
-        $barbero = Barbero::create(collect($datos)->except('servicios')->all());
+        $barbero = Barbero::create($this->atributos($datos));
         $barbero->servicios()->sync($datos['servicios']);
 
         return back()->with('success', 'Barbero creado. Ahora define su horario.');
@@ -51,7 +51,7 @@ class BarberoController extends Controller
     {
         $datos = $request->validated();
 
-        $barbero->update(collect($datos)->except('servicios')->all());
+        $barbero->update($this->atributos($datos));
         $barbero->servicios()->sync($datos['servicios']);
 
         return back()->with('success', 'Barbero actualizado.');
@@ -74,5 +74,20 @@ class BarberoController extends Controller
         $barbero->delete();
 
         return back()->with('success', 'Barbero eliminado.');
+    }
+
+    /**
+     * Los campos del barbero sin la lista de servicios. Si no se envió comisión (la barbería no
+     * las maneja) se conserva la que ya tenía, para no perderla si luego se activan.
+     *
+     * @param  array<string, mixed>  $datos
+     * @return array<string, mixed>
+     */
+    private function atributos(array $datos): array
+    {
+        return collect($datos)
+            ->except('servicios')
+            ->reject(fn ($valor, $campo) => $campo === 'comision_porcentaje' && $valor === null)
+            ->all();
     }
 }

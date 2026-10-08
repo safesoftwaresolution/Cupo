@@ -1,19 +1,26 @@
 <?php
 
 use App\Http\Controllers\AgendaController;
+use App\Http\Controllers\AjustesBarberiaController;
 use App\Http\Controllers\BarberoController;
 use App\Http\Controllers\CajaController;
 use App\Http\Controllers\ComisionController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\HorarioController;
+use App\Http\Controllers\MensajeController;
 use App\Http\Controllers\ReservaPublicaController;
 use App\Http\Controllers\ServicioController;
+use App\Http\Controllers\WhatsAppWebhookController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
     return Inertia::render('Welcome');
 })->name('home');
+
+// Webhook de WhatsApp (Meta). Sin sesión ni CSRF: se autentica con la firma de Meta.
+Route::get('webhooks/whatsapp', [WhatsAppWebhookController::class, 'verificar'])->name('webhooks.whatsapp.verificar');
+Route::post('webhooks/whatsapp', [WhatsAppWebhookController::class, 'recibir'])->middleware('throttle:300,1')->name('webhooks.whatsapp.recibir');
 
 // Reserva pública de cada barbería. Sin sesión: la barbería sale del `slug`.
 Route::middleware('reserva')->prefix('b/{slug}')->name('reserva.')->group(function () {
@@ -35,6 +42,8 @@ Route::middleware(['auth', 'verified', 'barberia'])->group(function () {
         Route::patch('citas/{cita}/estado', [AgendaController::class, 'estado'])->name('citas.estado');
     });
 
+    Route::get('mensajes', [MensajeController::class, 'index'])->middleware('rol:dueno,recepcion')->name('mensajes.index');
+
     // Caja: dueño y recepción cobran y cierran el día; anular, reabrir y liquidar comisiones es solo del dueño.
     Route::middleware('rol:dueno,recepcion')->prefix('caja')->name('caja.')->group(function () {
         Route::get('/', [CajaController::class, 'index'])->name('index');
@@ -53,6 +62,9 @@ Route::middleware(['auth', 'verified', 'barberia'])->group(function () {
 
     // Configuración de la barbería: solo el dueño.
     Route::middleware('rol:dueno')->group(function () {
+        Route::get('ajustes/barberia', [AjustesBarberiaController::class, 'edit'])->name('ajustes.barberia.edit');
+        Route::put('ajustes/barberia', [AjustesBarberiaController::class, 'update'])->name('ajustes.barberia.update');
+
         Route::resource('barberos', BarberoController::class)->only(['index', 'store', 'update', 'destroy']);
         Route::resource('servicios', ServicioController::class)->only(['index', 'store', 'update', 'destroy']);
 

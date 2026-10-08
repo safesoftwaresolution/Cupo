@@ -50,13 +50,21 @@ class AgendaController extends Controller
 
         $citas = Cita::query()
             ->whereBetween('inicia_en', [$fecha->copy()->startOfDay(), $fecha->copy()->endOfDay()])
-            ->with(['cliente:id,nombre,telefono', 'servicios', 'venta'])
+            ->with(['cliente:id,nombre,telefono,acepta_whatsapp', 'servicios', 'venta', 'recordatorio'])
             ->orderBy('inicia_en')
             ->get()
             ->map(fn (Cita $c) => [
                 'id' => $c->id,
                 // Se puede cobrar si sigue viva (o ya se marcó completada a mano) y aún no tiene venta vigente.
                 'cobrable' => $c->venta === null && in_array($c->estado, [EstadoCita::Pendiente, EstadoCita::Confirmada, EstadoCita::Completada], true),
+                'recordatorio' => $c->recordatorio ? [
+                    'estado' => $c->recordatorio->estado->value,
+                    'etiqueta' => $c->recordatorio->estado->etiqueta(),
+                    'enviado' => $c->recordatorio->enviado_en?->format('H:i'),
+                    'respuesta' => $c->recordatorio->respuesta,
+                    'error' => $c->recordatorio->error,
+                ] : null,
+                'acepta_whatsapp' => $c->cliente->acepta_whatsapp,
                 'venta' => $c->venta ? ['total' => $c->venta->total, 'metodo' => $c->venta->metodo_pago->etiqueta()] : null,
                 'barbero_id' => $c->barbero_id,
                 'inicia' => $c->inicia_en->format('H:i'),

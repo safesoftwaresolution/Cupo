@@ -20,7 +20,7 @@ export interface SharedData {
     name: string;
     quote: { message: string; author: string };
     auth: Auth;
-    barberia: { id: number; nombre: string; slug: string } | null;
+    barberia: { id: number; nombre: string; slug: string; maneja_comisiones: boolean } | null;
     flash: { success: string | null };
     ziggy: {
         location: string;
@@ -87,4 +87,31 @@ export interface CitaPorCobrar {
 export interface MetodoPagoOpcion {
     valor: string;
     etiqueta: string;
+}
+
+export interface Indicador {
+    valor: number;
+    anterior: number;
+    cambio: number | null;
+    serie?: number[];
+}
+
+export interface Analitica {
+    periodo: { desde: string; hasta: string; dias: number };
+    kpis: {
+        ventas: Indicador;
+        atenciones: Indicador;
+        ticket: Indicador;
+        ocupacion: { valor: number | null; anterior: number | null; cambio: number | null };
+        inasistencia: { valor: number | null; anterior: number | null; cambio: number | null; casos: number };
+        barberia?: Indicador;
+    };
+    ventas_por_dia: { fecha: string; valor: number; anterior: number }[];
+    demanda: { horas: number[]; dias: string[]; celdas: number[][]; maximo: number; total: number };
+    servicios: { nombre: string; cantidad: number; ingresos: number }[];
+    barberos: { nombre: string; atenciones: number; ventas: number; comision: number }[];
+    metodos: { etiqueta: string; total: number; cantidad: number }[];
+    origen: { etiqueta: string; cantidad: number }[];
+    clientes: { nuevos: number; recurrentes: number; sin_registro: number };
+    en_riesgo: { id: number; nombre: string; telefono: string; visitas: number; ultima: string; dias: number }[];
 }

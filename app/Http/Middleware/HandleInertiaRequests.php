@@ -45,7 +45,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'barberia' => fn () => $request->user()?->barberia?->only(['id', 'nombre', 'slug']),
+            'barberia' => fn () => $request->user()?->barberia?->only(['id', 'nombre', 'slug', 'maneja_comisiones']),
             'flash' => [
                 'success' => fn () => $request->session()->get('success'),
             ],

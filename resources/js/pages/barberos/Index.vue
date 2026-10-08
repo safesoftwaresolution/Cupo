@@ -21,6 +21,7 @@ defineProps<{
 const breadcrumbs: BreadcrumbItem[] = [{ title: 'Barberos', href: '/barberos' }];
 
 const page = usePage();
+const manejaComisiones = computed(() => (page.props.barberia as { maneja_comisiones: boolean } | null)?.maneja_comisiones ?? true);
 const errorGeneral = computed(() => (page.props.errors as Record<string, string>).barbero);
 
 const abierto = ref(false);
@@ -93,7 +94,7 @@ const eliminar = (barbero: Barbero) => {
 
     <AppLayout :breadcrumbs="breadcrumbs">
         <div class="flex flex-1 flex-col gap-6 p-4 md:p-6">
-            <PageHeader title="Barberos" description="Tu equipo, qué servicios hace cada uno y cuánto gana de comisión.">
+            <PageHeader title="Barberos" description="Tu equipo y qué servicios hace cada uno.">
                 <Button @click="nuevo"><Plus /> Nuevo barbero</Button>
             </PageHeader>
 
@@ -129,7 +130,7 @@ const eliminar = (barbero: Barbero) => {
                             <Badge v-if="!barbero.activo" variant="muted">Inactivo</Badge>
                         </div>
                         <div class="mt-1 flex flex-wrap items-center gap-1.5">
-                            <Badge variant="muted">Comisión {{ barbero.comision_porcentaje }}%</Badge>
+                            <Badge v-if="manejaComisiones" variant="muted">Comisión {{ barbero.comision_porcentaje }}%</Badge>
                             <Badge variant="muted"
                                 >{{ barbero.servicios.length }} {{ barbero.servicios.length === 1 ? 'servicio' : 'servicios' }}</Badge
                             >
@@ -161,7 +162,9 @@ const eliminar = (barbero: Barbero) => {
             <DialogContent class="max-h-[90svh] overflow-y-auto sm:max-w-md">
                 <DialogHeader>
                     <DialogTitle class="font-display text-xl">{{ editando ? 'Editar barbero' : 'Nuevo barbero' }}</DialogTitle>
-                    <DialogDescription>La comisión se aplica al valor de cada servicio que cobre.</DialogDescription>
+                    <DialogDescription>{{
+                        manejaComisiones ? 'La comisión se aplica al valor de cada servicio que cobre.' : 'Su nombre, sus servicios y su horario.'
+                    }}</DialogDescription>
                 </DialogHeader>
 
                 <form @submit.prevent="guardar" class="grid gap-4">
@@ -172,12 +175,12 @@ const eliminar = (barbero: Barbero) => {
                     </div>
 
                     <div class="grid grid-cols-2 gap-4">
-                        <div class="grid gap-2">
+                        <div class="grid gap-2" :class="{ 'col-span-2': !manejaComisiones }">
                             <Label for="telefono">Celular</Label>
                             <Input id="telefono" type="tel" v-model="form.telefono" placeholder="300 123 4567" />
                             <InputError :message="form.errors.telefono" />
                         </div>
-                        <div class="grid gap-2">
+                        <div v-if="manejaComisiones" class="grid gap-2">
                             <Label for="comision">Comisión (%)</Label>
                             <Input id="comision" type="number" min="0" max="100" step="0.5" v-model.number="form.comision_porcentaje" required />
                             <InputError :message="form.errors.comision_porcentaje" />

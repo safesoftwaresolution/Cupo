@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import PageHeader from '@/components/PageHeader.vue';
+import PanelEstadisticas from '@/components/PanelEstadisticas.vue';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { formatoCOP } from '@/lib/format';
-import { type BreadcrumbItem, type PasoConfiguracion, type SharedData } from '@/types';
+import { type Analitica, type BreadcrumbItem, type PasoConfiguracion, type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { ArrowRight, CalendarDays, Check, Copy, ExternalLink, Link2 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
@@ -22,6 +23,8 @@ interface CitaProxima {
 
 const props = defineProps<{
     pasos: PasoConfiguracion[];
+    analitica: Analitica | null;
+    rango: string;
     urlReserva: string;
     hoy: { total: number; ingresos: number; cobrado: number; proximas: CitaProxima[] };
 }>();
@@ -148,6 +151,15 @@ const copiarEnlace = async () => {
                     </CardContent>
                 </Card>
             </template>
+
+            <PanelEstadisticas
+                v-if="esDueno && analitica"
+                :analitica="analitica"
+                :rango="rango"
+                :barberia="page.props.barberia?.nombre ?? ''"
+                :url-reserva="urlReserva"
+                :maneja-comisiones="page.props.barberia?.maneja_comisiones ?? true"
+            />
 
             <Card v-if="esDueno" class="max-w-3xl">
                 <CardHeader class="flex-row items-start gap-4 space-y-0">

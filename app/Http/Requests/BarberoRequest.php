@@ -21,7 +21,8 @@ class BarberoRequest extends FormRequest
         return [
             'nombre' => ['required', 'string', 'max:120'],
             'telefono' => ['nullable', 'string', 'max:20'],
-            'comision_porcentaje' => ['required', 'numeric', 'between:0,100'],
+            // Solo se pide si la barbería maneja comisiones; si no, el campo ni se muestra.
+            'comision_porcentaje' => [Rule::requiredIf(fn () => $this->user()->barberia->maneja_comisiones), 'nullable', 'numeric', 'between:0,100'],
             'color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'activo' => ['required', 'boolean'],
             'servicios' => ['present', 'array'],

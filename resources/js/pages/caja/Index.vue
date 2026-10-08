@@ -79,6 +79,7 @@ const tituloFecha = computed(() => {
     return props.fecha === props.hoy ? `Hoy · ${capitalizado}` : capitalizado;
 });
 
+const manejaComisiones = computed(() => page.props.barberia?.maneja_comisiones ?? true);
 const aPagarBarberos = computed(() => props.resumen.comisiones + props.resumen.propinas);
 
 // --- Cobrar una cita ---------------------------------------------------------------------
@@ -232,7 +233,14 @@ const textoDiferencia = (valor: number) =>
                         </p>
                     </CardHeader>
                 </Card>
-                <Card>
+                <Card v-if="!manejaComisiones">
+                    <CardHeader class="space-y-1 pb-2">
+                        <CardDescription>Propinas</CardDescription>
+                        <CardTitle class="text-3xl tabular-nums">{{ formatoCOP(resumen.propinas) }}</CardTitle>
+                        <p class="text-xs text-muted-foreground">Son de cada barbero</p>
+                    </CardHeader>
+                </Card>
+                <Card v-else>
                     <CardHeader class="space-y-1 pb-2">
                         <CardDescription>A pagar a barberos</CardDescription>
                         <CardTitle class="text-3xl tabular-nums">{{ formatoCOP(aPagarBarberos) }}</CardTitle>
@@ -245,7 +253,7 @@ const textoDiferencia = (valor: number) =>
                     <CardHeader class="space-y-1 pb-2">
                         <CardDescription>Para la barbería</CardDescription>
                         <CardTitle class="text-3xl tabular-nums">{{ formatoCOP(resumen.barberia) }}</CardTitle>
-                        <p class="text-xs text-muted-foreground">Servicios menos comisiones</p>
+                        <p class="text-xs text-muted-foreground">{{ manejaComisiones ? 'Servicios menos comisiones' : 'Valor de los servicios' }}</p>
                     </CardHeader>
                 </Card>
                 <Card>
@@ -305,7 +313,11 @@ const textoDiferencia = (valor: number) =>
                 <Card>
                     <CardHeader class="space-y-1">
                         <CardTitle class="text-xl">Por barbero</CardTitle>
-                        <CardDescription>Lo que se le debe a cada uno hoy: comisión más propinas.</CardDescription>
+                        <CardDescription>{{
+                            manejaComisiones
+                                ? 'Lo que se le debe a cada uno hoy: comisión más propinas.'
+                                : 'Lo vendido y las propinas de cada uno hoy.'
+                        }}</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <p v-if="!porBarbero.length" class="py-2 text-sm text-muted-foreground">Aún no hay ventas este día.</p>

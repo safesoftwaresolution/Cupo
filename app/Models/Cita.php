@@ -52,6 +52,11 @@ class Cita extends Model
             ->withPivot(['nombre', 'duracion_minutos', 'precio']);
     }
 
+    public function recordatorio(): HasOne
+    {
+        return $this->hasOne(MensajeWhatsapp::class)->where('mensajes_whatsapp.tipo', MensajeWhatsapp::RECORDATORIO);
+    }
+
     /**
      * La venta vigente de la cita (las anuladas no cuentan, así que puede cobrarse de nuevo).
      */

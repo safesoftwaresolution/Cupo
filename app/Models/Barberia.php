@@ -20,6 +20,8 @@ class Barberia extends Model
         return [
             'prueba_hasta' => 'datetime',
             'activa' => 'boolean',
+            'maneja_comisiones' => 'boolean',
+            'recordatorios_activos' => 'boolean',
         ];
     }
 

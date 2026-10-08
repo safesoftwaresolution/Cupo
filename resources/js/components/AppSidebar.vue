@@ -4,7 +4,7 @@ import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem, type SharedData } from '@/types';
 import { Link, usePage } from '@inertiajs/vue3';
-import { CalendarDays, LayoutGrid, Percent, Scissors, Users, Wallet } from 'lucide-vue-next';
+import { CalendarDays, LayoutGrid, MessageCircle, Percent, Scissors, Store, Users, Wallet } from 'lucide-vue-next';
 import { computed } from 'vue';
 import AppLogo from './AppLogo.vue';
 
@@ -16,14 +16,23 @@ const mainNavItems = computed<NavItem[]>(() => {
 
     // La agenda la manejan el dueño y la recepción; la configuración de la barbería es solo del dueño.
     if (rol === 'dueno' || rol === 'recepcion') {
-        items.push({ title: 'Agenda', href: '/agenda', icon: CalendarDays }, { title: 'Caja', href: '/caja', icon: Wallet });
+        items.push(
+            { title: 'Agenda', href: '/agenda', icon: CalendarDays },
+            { title: 'Caja', href: '/caja', icon: Wallet },
+            { title: 'Mensajes', href: '/mensajes', icon: MessageCircle },
+        );
     }
 
     if (rol === 'dueno') {
+        // Sin comisiones no hay liquidación que mostrar.
+        if (page.props.barberia?.maneja_comisiones) {
+            items.push({ title: 'Comisiones', href: '/comisiones', icon: Percent });
+        }
+
         items.push(
-            { title: 'Comisiones', href: '/comisiones', icon: Percent },
             { title: 'Barberos', href: '/barberos', icon: Users },
             { title: 'Servicios', href: '/servicios', icon: Scissors },
+            { title: 'Mi barbería', href: '/ajustes/barberia', icon: Store },
         );
     }
 
